@@ -145,17 +145,17 @@ import Foundation
     /**
      * Get the SearchPathDirectory corresponding to the JS string
      */
-    public func getDirectory(directory: String?) -> FileManager.SearchPathDirectory? {
+    public func getDirectory(directory: String?) -> String? {
         if let directory = directory {
-            switch directory {
+        switch directory {
             case "CACHE":
-                return .cachesDirectory
+                return "Caches"
             case "LIBRARY":
-                return .libraryDirectory
+                return "Library"
             default:
-                return .documentDirectory
-            }
+                return "Documents"
         }
+    }
         return nil
     }
 
@@ -165,15 +165,25 @@ import Foundation
      */
     @objc public func getFileUrl(at path: String, in directory: String?) -> URL? {
         if let directory = getDirectory(directory: directory) {
-            guard let dir = FileManager.default.urls(for: directory, in: .userDomainMask).first else {
-                return nil
+            if FileManager.default.ubiquityIdentityToken != nil {
+                guard let dir = FileManager.default.url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent(directory) else {
+                    return nil
+                }
+                if !path.isEmpty {
+                    return dir.appendingPathComponent(path)
+                }
+                return dir
+            } else {
+                let localDocumentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                let localFolderURL = localDocumentsURL.appendingPathComponent(directory)
+                if !path.isEmpty {
+                    return localFolderURL.appendingPathComponent(path)
+                }
+                return localFolderURL
             }
-            if !path.isEmpty {
-                return dir.appendingPathComponent(path)
-            }
-            return dir
         } else {
             return URL(string: path)
         }
     }
+
 }
