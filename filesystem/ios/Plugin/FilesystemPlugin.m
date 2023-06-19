@@ -4,6 +4,7 @@
 // Define the plugin using the CAP_PLUGIN Macro, and
 // each method the plugin supports using the CAP_PLUGIN_METHOD macro.
 CAP_PLUGIN(FilesystemPlugin, "Filesystem",
+           CAP_PLUGIN_METHOD(syncToDrive, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(readFile, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(writeFile, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(appendFile, CAPPluginReturnPromise);
