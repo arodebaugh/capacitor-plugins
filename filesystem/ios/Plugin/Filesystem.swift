@@ -147,15 +147,31 @@ import Foundation
      */
     public func getDirectory(directory: String?) -> String? {
         if let directory = directory {
-        switch directory {
-            case "CACHE":
-                return "Caches"
-            case "LIBRARY":
-                return "Library"
-            default:
-                return "Documents"
+            switch directory {
+                case "CACHE":
+                    return "Caches"
+                case "LIBRARY":
+                    return "Library"
+                default:
+                    return "Documents"
+            }
         }
+        return nil
     }
+
+    public func getSearchPathDirectory(directory: String?) -> FileManager.SearchPathDirectory? {
+        if let directoryString = getDirectory(directory: directory) {
+            let searchPathDirectory: FileManager.SearchPathDirectory
+            switch directoryString {
+                case "Caches":
+                    searchPathDirectory = .cachesDirectory
+                case "Library":
+                    searchPathDirectory = .libraryDirectory
+                default:
+                    searchPathDirectory = .documentDirectory
+            }
+            return searchPathDirectory
+        }
         return nil
     }
 
@@ -174,12 +190,17 @@ import Foundation
                 }
                 return dir
             } else {
-                let localDocumentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                let localFolderURL = localDocumentsURL.appendingPathComponent(directory)
-                if !path.isEmpty {
-                    return localFolderURL.appendingPathComponent(path)
+               if let searchPathDirectory = getSearchPathDirectory(directory: directory) {
+                guard let dir = FileManager.default.urls(for: searchPathDirectory, in: .userDomainMask).first else {
+                        return nil
+                    }
+                    if !path.isEmpty {
+                        return dir.appendingPathComponent(path)
+                    }
+                    return dir
+               } else {
+                    return URL(string: path)
                 }
-                return localFolderURL
             }
         } else {
             return URL(string: path)
